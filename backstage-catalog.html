@@ -1,0 +1,209 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Backstage Catalog · Case Study</title>
+<meta name="description" content="Fixing Backstage Catalog UI gaps — product design for Harness IDP, 2024. A case study by Mayukh Mallick." />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@400;500&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="chrome.css?v=20261019j" />
+<link rel="stylesheet" href="crt.css?v=20261019j" />
+<link rel="stylesheet" href="case.css?v=20261019j" />
+</head>
+<body class="on-dark">
+
+<div class="crumb"><a href="index.html">Mayukh Mallick</a><span class="sep">/</span><a href="index.html#backstage-catalog">Works</a><span class="sep">/</span><span class="here">Backstage Catalog</span></div>
+<div class="tools" id="chrome-controls">
+  <a class="tool" href="https://www.linkedin.com/in/mayukh-mallick-a7460916b/" target="_blank" rel="noopener" title="LinkedIn" aria-label="LinkedIn">
+    <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M4.98 3.5a2.5 2.5 0 1 1 0 5 2.5 2.5 0 0 1 0-5zM3 9h4v12H3zM10 9h3.8v1.7h.1c.5-1 1.8-2 3.7-2 4 0 4.7 2.6 4.7 6V21h-4v-5.3c0-1.3 0-2.9-1.8-2.9s-2.1 1.4-2.1 2.8V21h-4z"/></svg>
+  </a>
+  <a class="tool" href="mailto:mallick370@gmail.com" title="Email" aria-label="Email">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2.5"/><path d="m3.5 7 8.5 6 8.5-6"/></svg>
+  </a>
+  <a class="tool" href="https://drive.google.com/file/d/1-JZFGbHOA5dz-EjMepoAYr3hyfAK_iZG/view?usp=sharing" target="_blank" rel="noopener" title="Resume" aria-label="Resume">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" aria-hidden="true"><path d="M7 3h7l5 5v13H7z"/><path d="M14 3v5h5M9.5 13h5M9.5 16.5h5"/></svg>
+  </a>
+  <span class="gap"></span>
+</div>
+<div class="chip" id="chip" aria-hidden="true"><i></i><span>Introduction</span></div>
+
+<main id="page">
+  <article>
+
+    <header class="hero wrap" data-chip="Introduction">
+      <div class="kicker r">Product design for Harness IDP · 2024</div>
+      <h1 class="display r title" style="--d:.05s">Fixing Backstage Catalog UI Gaps</h1>
+      <div class="grid">
+        <p class="lede r" style="--d:.15s">Early 2025, we shipped a brand new experience for the Harness IDP catalog page, the most visited page by our customers. This involved a revamp of the table, filters, tabs and groupings, and making the columns in the table flexible to be used.</p>
+        <dl class="meta r" style="--d:.25s">
+          <dt>My role</dt><dd>Research, conceptualisation, design and delivery of key feature areas</dd>
+          <dt>The team</dt><dd>1 designer, 1 product manager and 8 engineers</dd>
+          <dt>Timeline</dt><dd>May 2024 – Jan 2025</dd>
+        </dl>
+      </div>
+      <figure class="shot hero-shot glow tilt r" style="--d:.3s">
+        <img src="assets/work/PRCOkp9XwsbrXHglDOK003zRE.png" alt="The redesigned Harness IDP catalog page" />
+      </figure>
+    </header>
+
+    <section class="band wrap" data-chip="Problem summary">
+      <p class="no r no">00</p>
+      <h2 class="display r title">Problem summary</h2>
+      <p class="lede wide r" style="--d:.1s">The catalog homepage is arguably one of the most viewed pages by IDP users. It lists every catalog entity, and shows just the things a user owns when they land here. Yet it looked exactly like it did four years ago when Backstage was open-sourced.</p>
+      <p class="r" style="--d:.15s">Our enterprise users need more than a static table. They need to configure the columns based on their needs.</p>
+      <p class="quote display r" style="--d:.2s">The table needed to be unopinionated.</p>
+      <figure class="shot light tilt r">
+        <img src="assets/work/ZboSpNSIo5MzhGz8wKeG2WZLl4.png" alt="The old catalog page: a static table with a fixed sidebar and filter column" />
+        <figcaption class="cap">What the catalog page used to look like</figcaption>
+      </figure>
+    </section>
+
+    <section class="band wrap" data-chip="The challenge">
+      <p class="no r no">01</p>
+      <h2 class="display r title">The challenge</h2>
+
+      <div class="feature" style="margin-top:12px">
+        <h3 class="r">Unintuitive filtering</h3>
+        <p class="r">The catalog hosts many kinds of entities, and a lot of them: software entities like <strong>Component</strong> and <strong>API</strong>, hardware entities like <strong>Resource</strong>, two hierarchical kinds, <strong>Systems</strong> and <strong>Domains</strong>, to organise the rest, plus <strong>Users</strong>, <strong>Groups</strong> and <strong>Locations</strong> for debugging.</p>
+        <p class="r">Users come to this page with one of four critical use-cases:</p>
+        <ol class="list r">
+          <li>Look at the things I own</li>
+          <li>Look at the things that exist in my company</li>
+          <li>Debug Locations and ingestion issues</li>
+          <li>Explore teams and the users in them</li>
+        </ol>
+        <p class="r">Filters had been added gradually without grouping, which made it hard to understand what to filter by. Customers often had to switch between different Kinds just to see what they wanted.</p>
+        <figure class="shot light contain tilt r">
+          <img src="assets/work/Gw076mc5k8UR8Votc35wxFEe2o.png" alt="The old catalog filter sidebar, a long ungrouped list of filters" />
+          <figcaption class="cap">What our catalog filter UI looked like</figcaption>
+        </figure>
+      </div>
+
+      <div class="split">
+        <figure class="shot light contain tilt r">
+          <img src="assets/work/dBaphOh2ll0keWEovXKlP16SjM.png" alt="The narrow table, with descriptions truncated by the sidebar and filters" />
+        </figure>
+        <div>
+          <h3 class="r" style="font-size:28px; margin:0 0 8px; letter-spacing:-.02em">Lack of horizontal space</h3>
+          <p class="r">None of the descriptions were readable, because the sidebar and the filter section ate the horizontal space.</p>
+          <h3 class="r" style="font-size:28px; margin:28px 0 8px; letter-spacing:-.02em">Hard-coded columns</h3>
+          <p class="r">Catalog entities carry a large number of data points. With hard-coded columns, the table missed critical information like <strong>Scorecard scores</strong>, which all of our competitors show, while carrying columns users didn't care about. Jira's issue list has the same problem, solved with user-configurable columns.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="band wrap" data-chip="Design goals">
+      <p class="no r no">02</p>
+      <h2 class="display r title">Design goals</h2>
+      <p class="lede wide r" style="--d:.1s">We planned an end-to-end visual and usability refresh to address dated UI paradigms and make the catalog modern and delightful.</p>
+      <div class="cols">
+        <div class="r" style="--d:.15s"><h3>Flexible</h3><p>Users should seamlessly configure the width and position of table columns.</p></div>
+        <div class="r" style="--d:.25s"><h3>Simple</h3><p>Clean out the clutter, and help users easily complete their tasks.</p></div>
+      </div>
+    </section>
+
+    <section class="band wrap" data-chip="The solution">
+      <p class="no r no">03</p>
+      <h2 class="display r title">The solution</h2>
+
+      <div class="feature">
+        <div class="tag r">Solution 1</div>
+        <h3 class="r">A more intuitive way to take actions on table columns</h3>
+        <p class="r">We wanted to help users change the column arrangement and take actions like sorting, hiding and pinning more easily. Now users simply hover a column name and a dropdown shows the actions available for that column.</p>
+        <figure class="shot glow tilt r">
+          <img src="assets/work/0nKnkT7TZl0FIVaJZBe8yrTsww.png" alt="Column header dropdown with sort, hide and pin actions" />
+        </figure>
+      </div>
+
+      <div class="feature">
+        <div class="tag r">Solution 2</div>
+        <h3 class="r">Reducing the cluttered search bar and filters</h3>
+        <p class="r">Our first iteration was functional, but not visually good or optimised.</p>
+        <figure class="shot light tilt r">
+          <img src="assets/work/BZH2mJHifNszSwlHVObBDjUq8.png" alt="First iteration of the search bar and filters" />
+          <figcaption class="cap">Iteration 1</figcaption>
+        </figure>
+        <h4 class="sub r">Subsequent iterations</h4>
+        <p class="r">After going through the filter designs of GitHub, Linear, Vercel, Google Cloud Console and others, we arrived at the design that proved to be the users' choice. It may look like more clicks, but each click has a purpose, and users found it more intuitive.</p>
+        <p class="r">Per <strong>Miller's Law</strong>, the average person holds about seven, plus or minus two, pieces of information in short-term working memory. Reducing the clutter in the search bar lowers the cognitive load and helps users make concise decisions while applying a filter.</p>
+        <h4 class="sub r">Iteration 2</h4>
+        <p class="r">Let users choose which filters they want to add and see in the current view.</p>
+        <div class="tag r" style="margin-top:28px">Adding filter stages</div>
+        <div class="stages">
+          <div class="stage r"><div class="label">Stage 1 · Click the Filter button to add a filter</div><img src="assets/work/5vAbNyTAr5awYz2J531Hk92kzb0.png" alt="Stage 1: the filter button" /></div>
+          <div class="stage r"><div class="label">Stage 2 · Select a filter</div><img src="assets/work/iMqQF2Swqiw29xC0Jpc5TAOeJhM.png" alt="Stage 2: choosing a filter" /></div>
+          <div class="stage r"><div class="label">Stage 3 · Select values</div><img src="assets/work/g9g5OvSBNLuy8guVFxlz3RNZPY.png" alt="Stage 3: picking filter values" /></div>
+          <div class="stage r"><div class="label">Stage 4 · Add more filters with the Add Filter button</div><img src="assets/work/SQ6zE16CYZ2alp0jUKm1sz6lf2Y.png" alt="Stage 4: adding another filter" /></div>
+        </div>
+        <div class="split" style="margin-top:56px">
+          <figure class="shot light contain tilt r">
+            <img src="assets/work/EWp6Qgvs6mJANDXLYGduoXlLIUE.png" alt="Filter condition selector: is, is not" style="max-height:260px" />
+          </figure>
+          <div>
+            <h4 class="sub r" style="margin-top:0">Letting users control the conditions</h4>
+            <p class="r">In a number of use cases users wanted to ignore a few filter values and see the resulting data. So we introduced conditional selection in the filters as well.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="feature">
+        <div class="tag r">Solution 3</div>
+        <h3 class="r">Save filters as a view</h3>
+        <p class="r">Saving filters wasn't enough. Users also wanted to save the arrangement of columns, so we introduced saving the whole view, which can be shared across a team.</p>
+        <figure class="shot light tilt r">
+          <img src="assets/work/EcluQF4R6KRhVQmIpnzSzJwYEHU.png" alt="Saving a view with filters and column arrangement" />
+          <figcaption class="cap">Saving a view</figcaption>
+        </figure>
+      </div>
+    </section>
+
+    <section class="band wrap" data-chip="Results">
+      <p class="no r no">04</p>
+      <h2 class="display r title">Results</h2>
+      <div class="stat r" style="--d:.1s"><b>120%</b><span>increase in monthly usage of the catalog page</span></div>
+      <p class="r" style="--d:.15s">Users visit the page more often, and the main reason is the customisation. Engineering leaders started creating persona-based views for their teams, which helps each user see what matters most to them.</p>
+      <p class="r" style="--d:.2s">Previously all of this needed a dedicated support engineer building custom pages in code. With the flexible table, users have become self-sufficient at configuring it themselves, and that engineering time is saved.</p>
+      <blockquote class="testimonial r" style="--d:.25s">
+        <p>“Mayukh led the delivery of large-scale initiatives such as IDP 2.0, IDP Catalog, and the SSEM NAB prototype — which directly contributed to securing the $****** million deal.”</p>
+        <div class="who">Keying Bi, Director of Design, Harness</div>
+      </blockquote>
+    </section>
+
+    <section class="outro" data-chip="Next">
+      <div class="wrap">
+        <div class="next r">Next case study</div>
+        <a class="next-link r" href="cde.html" style="--d:.1s"><b class="display">Cloud Dev Environments →</b></a>
+      </div>
+    </section>
+    <div class="foot wrap">© 2026 Mayukh Mallick</div>
+
+  </article>
+</main>
+
+<nav class="bar" aria-label="Pages">
+  <a href="index.html#backstage-catalog" class="on" aria-current="page">Works</a>
+  <a href="about.html">About</a>
+  <a href="mailto:mallick370@gmail.com">Contact</a>
+  <span class="divider"></span>
+  <button id="helpBtn" type="button" aria-label="Help">?</button>
+</nav>
+<div class="help" id="help" role="status">Scroll to read · the panels tilt as they pass · <kbd>Works</kbd> takes you back to the billboard</div>
+
+<script src="case.js?v=20261019j"></script>
+<script src="chrome.js?v=20261019j"></script>
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://cdn.jsdelivr.net/npm/three@0.180.0/build/three.module.js",
+    "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.180.0/examples/jsm/"
+  }
+}
+</script>
+<script type="module">
+  import { initCRT } from './crt.js?v=20261019j';
+  initCRT({ target: '#page', mount: '#chrome-controls' });
+</script>
+</body>
+</html>

@@ -1,0 +1,47 @@
+/* ---------- shared page chrome: breadcrumb, icon tools, bottom toolbar ----------
+   Sits above the CRT glass (z 10) like controls on the set's bezel. */
+:root { --chrome-ink: #0b0b0c; --chrome-muted: #6f6f76; --chrome-line: #e7e7ea; --chrome-chip: #f1f1f3; --chrome-select: #4c7dff; }
+.crumb {
+  position: fixed; left: 20px; top: 16px; z-index: 11; font-family: Inter, system-ui, sans-serif; font-size: 13px; font-weight: 600; color: var(--chrome-ink);
+  display: flex; gap: 6px; align-items: center; pointer-events: auto;
+}
+.crumb a { text-decoration: none; color: inherit; }
+.crumb .sep, .crumb .here { color: var(--chrome-muted); font-weight: 500; }
+.tools { position: fixed; right: 20px; top: 12px; z-index: 11; display: flex; align-items: center; gap: 6px; }
+.tool {
+  width: 30px; height: 30px; border-radius: 7px; display: grid; place-items: center; color: #333; text-decoration: none;
+  border: 1px solid transparent; transition: background .15s, border-color .15s;
+}
+.tool:hover { background: #fff; border-color: var(--chrome-line); }
+.tool svg { width: 15px; height: 15px; }
+.tools .gap { width: 10px; }
+
+/* on the sky-blue hero the chrome is white */
+body.on-dark .crumb, body.on-dark .crumb .sep, body.on-dark .crumb .here { color: #fff; text-shadow: 0 1px 0 rgba(0,0,0,.25); }
+body.on-dark .tool { color: #fff; }
+body.on-dark .tool:hover { background: rgba(255,255,255,.18); border-color: rgba(255,255,255,.35); }
+
+.bar {
+  position: fixed; left: 50%; bottom: 14px; transform: translateX(-50%); z-index: 11;
+  display: flex; align-items: center; gap: 6px; padding: 5px; background: #fff; border: 1px solid var(--chrome-line); border-radius: 10px;
+  box-shadow: 0 6px 24px rgba(0,0,0,.08); font-family: Inter, system-ui, sans-serif; font-size: 12px; font-weight: 600;
+}
+.bar a, .bar button {
+  appearance: none; border: 0; background: none; font: inherit; color: var(--chrome-ink); text-decoration: none;
+  padding: 7px 10px; border-radius: 6px; cursor: pointer; display: inline-grid; place-items: center; min-width: 30px;
+}
+.bar a:hover, .bar button:hover { background: var(--chrome-chip); }
+.bar .on { background: var(--chrome-select); color: #fff; }
+.bar .on:hover { background: var(--chrome-select); }
+.bar .pager { display: flex; align-items: center; gap: 2px; color: var(--chrome-muted); font-weight: 500; padding: 0 2px; }
+.bar .pager span { min-width: 36px; text-align: center; font-variant-numeric: tabular-nums; }
+.bar button:disabled { opacity: .3; cursor: default; }
+.bar button:disabled:hover { background: none; }
+.bar svg { width: 12px; height: 12px; }
+.bar .divider { width: 1px; height: 18px; background: var(--chrome-line); }
+.help {
+  position: fixed; left: 50%; bottom: 64px; transform: translateX(-50%) translateY(6px); z-index: 11; opacity: 0; pointer-events: none;
+  background: #111; color: #fff; font-family: Inter, system-ui, sans-serif; font-size: 12px; padding: 8px 12px; border-radius: 8px; white-space: nowrap; transition: opacity .15s, transform .15s;
+}
+.help.show { opacity: 1; transform: translateX(-50%); }
+.help kbd { background: rgba(255,255,255,.15); padding: 1px 6px; border-radius: 4px; font-family: inherit; }

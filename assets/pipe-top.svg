@@ -1,0 +1,19 @@
+<svg preserveAspectRatio="none" overflow="visible" style="display: block;" width="144" height="72" viewBox="0 0 144 72" fill="none" xmlns="http://www.w3.org/2000/svg">
+<g id="pipe/top">
+<rect id="bg-black" width="144" height="72" fill="black"/>
+<rect id="bg-green" x="4.5" y="4.5" width="135" height="58.5" fill="#41D83D"/>
+<g id="Vector">
+<path d="M90 9H139.5V63H90V9Z" fill="#009F00"/>
+<path d="M49.5 9H85.5V63H49.5V9Z" fill="#009F00"/>
+<path d="M36 9H45V63H36V9Z" fill="#009F00"/>
+<path d="M4.5 9H13.5V63H4.5V9Z" fill="#009F00"/>
+<path d="M18 9H22.5V63H18V9Z" fill="#009F00"/>
+</g>
+<g id="Vector_2">
+<path d="M135 9H139.5V63H135V9Z" fill="black"/>
+<path d="M103.5 9H108V63H103.5V9Z" fill="black"/>
+<path d="M94.5 9H99V63H94.5V9Z" fill="black"/>
+<path d="M112.5 9H130.5V63H112.5V9Z" fill="black"/>
+</g>
+</g>
+</svg>

@@ -1,0 +1,654 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Next Level Hero</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Inter:wght@500;600&family=Space+Grotesk:wght@400;500&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="chrome.css?v=20261019j" />
+<link rel="stylesheet" href="crt.css?v=20261019j" />
+<style>
+  :root {
+    --sky: #6986fe;
+    --brick: #ef4e00;
+    --cream: #ffdcc5;
+    --pipe-green: #41d83d;
+    --pipe-dark: #009f00;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; }
+  body {
+    background: var(--sky);
+    overflow: hidden;
+    font-family: Helvetica, Arial, sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* 1920x1080 design canvas, scaled to the viewport */
+  #viewport { position: fixed; inset: 0; overflow: hidden; }
+  #world { position: absolute; inset: 0; }
+  #stage {
+    position: absolute;
+    left: 50%; bottom: 0;
+    width: 1920px; height: 1080px;
+    transform-origin: 50% 100%;
+    transform: translateX(-50%) scale(var(--s, 1));
+    background: var(--sky);
+    overflow: hidden;
+  }
+  /* ground continues past the 1920px frame on wider viewports */
+  .ext { position: absolute; bottom: 0; overflow: hidden; }
+  .ext-left  { left: 0;  right: calc(50% + 960px * var(--s, 1)); top: calc(100% - 75px * var(--s, 1)); }
+  .ext-right { right: 0; left:  calc(50% + 956px * var(--s, 1)); top: calc(100% - 202px * var(--s, 1)); }  /* starts at the pipe's edge */
+  .ext-left  .pattern, .ext-left  .shadow, .ext-left  .surface { background-position: right 0; }               /* tile phase matches the stage grass */
+  .ext-right .pattern, .ext-right .shadow, .ext-right .surface { background-position: calc(-10px * var(--s, 1)) 0; }
+  .ext .pattern, .ext .shadow, .ext .surface { position: absolute; left: 0; right: 0; background-repeat: repeat; background-position: 0 0; }
+  .ext .pattern { background-image: url(assets/grass-pattern.png); background-size: calc(21px * var(--s, 1)) calc(16px * var(--s, 1)); top: calc(2.4px * var(--s, 1)); bottom: 0; }
+  .ext .shadow  { background-image: url(assets/grass-shadow.png);  background-size: calc(21px * var(--s, 1)) calc(13px * var(--s, 1)); bottom: 0; height: calc(31px * var(--s, 1)); }
+  .ext .surface { background-image: url(assets/grass-surface.png); background-size: calc(21px * var(--s, 1)) calc(2px * var(--s, 1));  top: 0; height: calc(4.8px * var(--s, 1)); }
+  .ext-right .pattern { top: calc(3.65px * var(--s, 1)); }
+  .ext-right .shadow { height: calc(47.5px * var(--s, 1)); }
+  .ext-right .surface { height: calc(7.3px * var(--s, 1)); }
+  .abs { position: absolute; }
+  .pix { image-rendering: pixelated; image-rendering: crisp-edges; }
+  img.fill { position: absolute; inset: 0; width: 100%; height: 100%; display: block; max-width: none; }
+
+  /* Title plate */
+  .title {
+    left: 523px; top: 152px;
+    display: flex; flex-direction: column; gap: 26px; align-items: flex-start; justify-content: center;
+    padding: 24px 80px;
+    border-radius: 12px;
+    background: var(--brick);
+    box-shadow: -4px -4px 0 0 #ffdbc6, 4px 4px 4px 0 #000;
+    font-family: 'Press Start 2P', monospace;
+    line-height: 1.5;
+    text-shadow: 12px 5px 1px #000;
+    white-space: nowrap;
+    overflow: hidden;
+  }
+  .title h1, .title p { margin: 0; font-weight: 400; color: var(--cream); }
+  .title p  { font-size: 56px; letter-spacing: -2.8px; }
+  .title h1 { font-size: 80px; letter-spacing: -9.6px; color: #ffddc5; }
+
+  /* CTA button */
+  .cta {
+    left: 775px; top: 484px;
+    display: inline-flex; align-items: center; justify-content: center; gap: 15.75px;
+    height: 84px; padding: 15.75px 42px;
+    border: 0; border-radius: 15.75px; cursor: pointer;
+    background: #fff; color: #000;
+    font-family: Inter, Helvetica, Arial, sans-serif; font-weight: 500;
+    font-size: 34.13px; line-height: 42px; white-space: nowrap;
+    box-shadow: inset 0 31.5px 31.5px 0 rgba(255,255,255,.12), inset 0 -5.25px 5.25px 0 rgba(48,48,48,.10);
+    transition: transform .12s ease, box-shadow .12s ease;
+  }
+  .cta:hover { transform: translateY(-2px); box-shadow: inset 0 31.5px 31.5px 0 rgba(255,255,255,.12), inset 0 -5.25px 5.25px 0 rgba(48,48,48,.10), 0 8px 0 0 rgba(0,0,0,.35); }
+  .cta:active { transform: translateY(2px); }
+
+  /* Coins */
+  .coin { width: 46.667px; height: 53.333px; }
+  .coin img { animation: coin-spin 1.4s steps(1) infinite; }
+  @keyframes coin-spin { 0%,100% { transform: scaleX(1); } 50% { transform: scaleX(.6); } }
+  .coin:nth-child(2) img { animation-delay: .2s } .coin:nth-child(3) img { animation-delay: .4s } .coin:nth-child(4) img { animation-delay: .6s }
+
+  /* Pipe */
+  .pipe { left: 1772px; top: 599px; width: 144px; height: 492.179px; }
+  .pipe-top { position: absolute; left: 0; right: 0; top: 0; height: 72px; }
+  .pipe-bottom { position: absolute; left: 50%; top: 72px; bottom: 0; width: 135px; transform: translateX(-50%); overflow: hidden; }
+  .pipe-bottom > div { position: absolute; top: 0; height: 1800px; }
+  .pipe-black { left: 0; width: 135px; background: #000; }
+  .pipe-green { left: 4.5px; width: 126px; background: var(--pipe-green); }
+  .pipe-v1 { left: 4.5px; width: 126px; background: url(assets/pipe-vector.svg) 0 0 / 126px 1800px no-repeat; }
+  .pipe-v2 { left: 85.5px; width: 45px; background: url(assets/pipe-vector1.svg) 0 0 / 45px 1800px no-repeat; }
+
+  /* Piranha plant (flipped horizontally in the design) */
+  .piranha { left: 1799px; top: 492px; width: 76px; height: 109px; transform: scaleX(-1); animation: chomp 2.4s ease-in-out infinite; }
+  @keyframes chomp { 0%, 20%, 100% { translate: 0 0; } 50%, 70% { translate: 0 -14px; } }
+
+  /* Grass platforms */
+  .grass { overflow: hidden; }
+  .grass .pattern, .grass .shadow, .grass .surface { position: absolute; left: 0; right: 0; background-repeat: repeat; background-position: 0 0; }
+  .grass .pattern { background-image: url(assets/grass-pattern.png); background-size: 21px 16px; bottom: 0; }
+  .grass .shadow  { background-image: url(assets/grass-shadow.png);  background-size: 21px 13px; bottom: 0; }
+  .grass .surface { background-image: url(assets/grass-surface.png); background-size: 21px 2px; top: 0; }
+  .grass-sm { left: 0; top: 1005px; width: 1028px; height: 69px; }
+  .grass-sm .pattern { top: 2.38px; } .grass-sm .shadow { height: 30.891px; } .grass-sm .surface { height: 4.752px; }
+  .grass-md { left: 1171px; top: 878px; width: 596px; height: 204.299px; }
+  .grass-md .pattern { top: 3.65px; } .grass-md .shadow { height: 47.451px; } .grass-md .surface { height: 7.3px; }
+  .hill-up { left: 1018px; top: 943px; width: 144px; height: 131px; }
+
+  /* Textured hill with eyes */
+  .hill { left: 77px; top: 795px; width: 167px; height: 224px; }
+  .hill .fill { position: absolute; inset: 1.15% 1.55%; }
+  .hill .outline { position: absolute; inset: 0.77% 1.03% 1.15% 1.03%; }
+  .hill .outline img { position: absolute; inset: -0.54% -0.73%; width: auto; height: auto; }
+  .hill .eye { position: absolute; background: #000; }
+
+  /* 3D plumber */
+  #plumber { left: 330px; top: 290px; width: 500px; height: 800px; pointer-events: none; z-index: 1; }
+  .nav, .title, .cta { z-index: 2; }
+  #plumber canvas { display: block; width: 100%; height: 100%; touch-action: manipulation; }
+  #plumber:focus-visible { outline: 3px dashed #fff; outline-offset: -3px; }
+  #plumber .fallback {
+    position: absolute; left: 50%; bottom: 36px; transform: translateX(-50%);
+    font-family: 'Press Start 2P', monospace; font-size: 12px; color: #fff; opacity: .7; white-space: nowrap;
+  }
+
+  /* ---------- game ---------- */
+  #bg, #level { position: absolute; left: 0; top: 0; width: 0; height: 0; will-change: transform; }
+  #bg .hill { opacity: .8; filter: saturate(.8) brightness(.95); }
+  #level .plat { position: absolute; overflow: hidden; }
+  #level .pipe, #level .coin, #level .hill, #level .hill-up, #bg .hill { position: absolute; }
+  #level .plant-slot { position: absolute; width: 76px; height: 109px; overflow: hidden; }
+  #level .tower { position: absolute; display: block; cursor: grab; touch-action: pan-y; }
+  #level .tower.spinning { cursor: grabbing; }
+  #level .plant-slot .piranha { position: absolute; left: 0; top: 0; animation: none; transform: scaleX(-1); }
+  #level .coin.taken img { animation: coin-pop .45s ease-out forwards; }
+  @keyframes coin-pop { 0% { transform: translateY(0) scale(1); opacity: 1; } 100% { transform: translateY(-120px) scale(1.3); opacity: 0; } }
+  #level .lost-coin { position: absolute; width: 46.667px; height: 53.333px; animation: coin-lost .9s ease-in forwards; }
+  @keyframes coin-lost { 0% { transform: translate(0,0) rotate(0); opacity: 1; } 100% { transform: translate(var(--dx), var(--dy)) rotate(540deg); opacity: 0; } }
+
+  /* billboards (big: 1200px board on a 1920px stage) */
+  .billboard { position: absolute; width: 1200px; height: 900px; display: block; text-decoration: none; color: inherit; cursor: pointer; }
+  .billboard .bb-board {
+    position: absolute; left: 0; top: 0; width: 1200px; height: 690px; box-sizing: border-box;
+    background: #141414; border: 12px solid #0a0a0a; border-radius: 10px; padding: 24px;
+    box-shadow: inset 0 0 0 10px #ffdcc5, 14px 14px 0 rgba(0,0,0,.35);
+    transition: transform .2s ease;
+  }
+  .billboard:hover .bb-board, .billboard:focus-visible .bb-board { transform: translateY(-10px); }
+  .billboard .bb-board img { display: block; width: 100%; height: 100%; object-fit: cover; background: #222; }
+  .billboard .bb-tag {
+    position: absolute; right: 36px; bottom: 36px; padding: 12px 14px 10px;
+    font: 18px/1 'Press Start 2P', monospace; color: #ffdcc5; background: #ef4e00; border: 5px solid #000;
+    animation: hint-blink 1.2s steps(2) infinite;
+  }
+  .billboard .bb-plate {
+    position: absolute; left: 80px; right: 80px; top: 702px; height: 76px; box-sizing: border-box; padding: 0 20px;
+    display: flex; align-items: center; justify-content: center;
+    background: #ef4e00; border: 6px solid #000; box-shadow: 6px 6px 0 rgba(0,0,0,.35);
+    font: 24px/1.3 'Press Start 2P', monospace; color: #ffdcc5; text-shadow: 4px 4px 0 #000; text-align: center;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  .billboard .bb-post {
+    position: absolute; top: 774px; width: 46px; height: 126px; border: 5px solid #000; box-sizing: border-box;
+    background: linear-gradient(90deg, #6b3b1a, #a2612f 45%, #5a3014);
+  }
+  .billboard .bb-post.l { left: 180px; } .billboard .bb-post.r { right: 180px; }
+
+  /* speech bubble */
+  .bubble {
+    position: absolute; left: 0; top: 0; z-index: 3; transform: translate(-50%, -100%);
+    background: #fff; color: #000; border: 4px solid #000; border-radius: 6px; padding: 16px 20px;
+    font: 15px/1.7 'Press Start 2P', monospace; text-align: center; white-space: normal; max-width: 640px; width: max-content;
+    box-shadow: 6px 6px 0 rgba(0,0,0,.35); pointer-events: none;
+    opacity: 0; transition: opacity .18s ease; will-change: transform;
+  }
+  .bubble.show { opacity: 1; }
+  .bubble::after, .bubble::before {
+    content: ''; position: absolute; left: 50%; border: 14px solid transparent; border-bottom: 0; margin-left: -14px;
+  }
+  .bubble::after  { bottom: -18px; border-top-color: #000; }
+  .bubble::before { bottom: -12px; border-top-color: #fff; z-index: 1; }
+  .bubble.sad { background: #ffdcc5; color: #3a1a00; }
+  .bubble.sad::before { border-top-color: #ffdcc5; }
+  .bubble.happy { background: #41d83d; }
+  .bubble.happy::before { border-top-color: #41d83d; }
+
+  body.playing #hero-scene { display: none; }
+  body.playing .title, body.playing .cta { opacity: 0; transform: translateY(-80px); pointer-events: none; }
+  .title, .cta { transition: opacity .55s ease, transform .55s cubic-bezier(.5,0,.3,1); }
+  .cta { transition: opacity .55s ease, transform .55s cubic-bezier(.5,0,.3,1), box-shadow .12s ease; }
+  #plumber.in-game { left: 0; top: 0; will-change: transform; }
+
+  #hud {
+    position: absolute; left: 60px; top: max(64px, calc(60px / var(--s, 1))); z-index: 3; display: none; gap: 48px;
+    font-family: 'Press Start 2P', monospace; font-size: max(22px, calc(13px / var(--s, 1))); color: #fff; text-shadow: 3px 3px 0 #000; white-space: nowrap;
+  }
+  #hud b { color: #ffdcc5; font-weight: 400; }
+  #hud .inf { font-size: 30px; line-height: 0; vertical-align: -4px; }
+  #hud .pulse { animation: hud-pulse .5s ease-out; }
+  @keyframes hud-pulse { 0% { transform: scale(1.6); color: #fff; } 100% { transform: scale(1); } }
+  #hint {
+    position: absolute; left: 50%; top: max(170px, calc(130px / var(--s, 1))); transform: translateX(-50%); z-index: 3; display: none;
+    font-family: 'Press Start 2P', monospace; font-size: max(20px, calc(12px / var(--s, 1))); color: #fff; text-shadow: 3px 3px 0 #000; white-space: nowrap;
+    animation: hint-blink 1s steps(2) infinite;
+  }
+  @keyframes hint-blink { 50% { opacity: .35; } }
+  body.playing #hud { display: flex; }
+  body.playing #hint.show { display: block; }
+
+  #touch { position: absolute; inset: 0; z-index: 4; display: none; pointer-events: none; }
+  .tbtn {
+    position: absolute; bottom: 60px; width: 130px; height: 130px; border-radius: 50%; border: 4px solid rgba(255,255,255,.7);
+    background: rgba(0,0,0,.35); color: #fff; font: 40px/1 'Press Start 2P', monospace; pointer-events: auto;
+    -webkit-tap-highlight-color: transparent; touch-action: none; user-select: none;
+  }
+  .tbtn:active, .tbtn.held { background: rgba(255,255,255,.35); }
+  .tbtn.left { left: 50px; } .tbtn.right { left: 250px; } .tbtn.jump { right: 60px; width: 210px; height: 210px; bottom: 40px; }
+  .tbtn { width: 170px; height: 170px; bottom: 60px; }
+  @media (pointer: coarse) { body.playing #touch { display: block; } }
+
+  /* phones held upright: the 16:9 stage is too small to play */
+  #rotate {
+    position: fixed; inset: 0; z-index: 20; display: none; align-items: center; justify-content: center; text-align: center;
+    background: rgba(20, 30, 90, .92); color: #fff; font-family: 'Press Start 2P', monospace; font-size: 14px; line-height: 2; padding: 32px;
+  }
+  @media (orientation: portrait) and (pointer: coarse) { body.playing #rotate { display: flex; } }
+
+  @media (prefers-reduced-motion: reduce) {
+    .coin img, .piranha { animation: none; }
+  }
+</style>
+</head>
+<body class="on-dark">
+<div class="crumb"><a href="index.html">Mayukh Mallick</a><span class="sep">/</span><span class="here">Works</span></div>
+<div class="tools" id="chrome-controls">
+  <a class="tool" href="https://www.linkedin.com/in/mayukh-mallick-a7460916b/" target="_blank" rel="noopener" title="LinkedIn" aria-label="LinkedIn">
+    <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M4.98 3.5a2.5 2.5 0 1 1 0 5 2.5 2.5 0 0 1 0-5zM3 9h4v12H3zM10 9h3.8v1.7h.1c.5-1 1.8-2 3.7-2 4 0 4.7 2.6 4.7 6V21h-4v-5.3c0-1.3 0-2.9-1.8-2.9s-2.1 1.4-2.1 2.8V21h-4z"/></svg>
+  </a>
+  <a class="tool" href="mailto:mallick370@gmail.com" title="Email" aria-label="Email">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2.5"/><path d="m3.5 7 8.5 6 8.5-6"/></svg>
+  </a>
+  <a class="tool" href="https://drive.google.com/file/d/1-JZFGbHOA5dz-EjMepoAYr3hyfAK_iZG/view?usp=sharing" target="_blank" rel="noopener" title="Resume" aria-label="Resume">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" aria-hidden="true"><path d="M7 3h7l5 5v13H7z"/><path d="M14 3v5h5M9.5 13h5M9.5 16.5h5"/></svg>
+  </a>
+  <span class="gap"></span>
+</div>
+<nav class="bar" aria-label="Pages">
+  <a href="index.html" class="on" aria-current="page">Works</a>
+  <a href="about.html">About</a>
+  <a href="mailto:mallick370@gmail.com">Contact</a>
+  <span class="divider"></span>
+  <button id="helpBtn" type="button" aria-label="Help">?</button>
+</nav>
+<div class="help" id="help" role="status">Scroll or <kbd>←</kbd> <kbd>→</kbd> to run · click or <kbd>space</kbd> to jump · click the plumber before you start</div>
+
+<div id="viewport">
+ <div id="world">
+  <div class="ext ext-left pix" aria-hidden="true"><div class="pattern"></div><div class="shadow"></div><div class="surface"></div></div>
+  <div class="ext ext-right pix" aria-hidden="true"><div class="pattern"></div><div class="shadow"></div><div class="surface"></div></div>
+  <main id="stage" aria-label="Designing the next level">
+
+    <header class="abs title">
+      <p>Designing the</p>
+      <h1>NEXT LEVEL</h1>
+    </header>
+
+    <button class="abs cta" type="button">Start the Journey</button>
+
+    <div id="hero-scene">
+    <!-- coins -->
+    <div class="coins" aria-hidden="true">
+      <div class="abs coin" style="left:1265px; top:802px"><img class="fill" src="assets/coin.svg" alt="" /></div>
+      <div class="abs coin" style="left:1345px; top:724px"><img class="fill" src="assets/coin.svg" alt="" /></div>
+      <div class="abs coin" style="left:1425px; top:646px"><img class="fill" src="assets/coin.svg" alt="" /></div>
+      <div class="abs coin" style="left:1505px; top:568px"><img class="fill" src="assets/coin.svg" alt="" /></div>
+    </div>
+
+    <!-- piranha + pipe -->
+    <div class="abs piranha" aria-hidden="true"><img class="fill" src="assets/piranha.svg" alt="" /></div>
+    <div class="abs pipe" aria-hidden="true">
+      <div class="pipe-bottom">
+        <div class="pipe-black"></div>
+        <div class="pipe-green"></div>
+        <div class="pipe-v1"></div>
+        <div class="pipe-v2"></div>
+      </div>
+      <div class="pipe-top"><img class="fill" src="assets/pipe-top.svg" alt="" /></div>
+    </div>
+
+    <!-- ground -->
+    <div class="abs grass grass-sm pix" aria-hidden="true"><div class="pattern"></div><div class="shadow"></div><div class="surface"></div></div>
+    <div class="abs hill-up" aria-hidden="true"><img class="fill" src="assets/grass-hill-up.svg" alt="" /></div>
+    <div class="abs grass grass-md pix" aria-hidden="true"><div class="pattern"></div><div class="shadow"></div><div class="surface"></div></div>
+
+    <!-- textured hill -->
+    <div class="abs hill" aria-hidden="true">
+      <div class="fill"><img class="fill" src="assets/hill-fill.svg" alt="" /></div>
+      <div class="outline"><img src="assets/hill-outline.svg" alt="" /></div>
+      <div class="eye" style="inset:3.85% 52.58% 94.62% 45.36%"></div><div class="eye" style="inset:3.85% 45.36% 94.62% 52.58%"></div>
+      <div class="eye" style="inset:16.92% 36.08% 81.54% 61.86%"></div><div class="eye" style="inset:16.92% 28.87% 81.54% 69.07%"></div>
+      <div class="eye" style="inset:78.46% 19.59% 20% 78.35%"></div><div class="eye" style="inset:78.46% 12.37% 20% 85.57%"></div>
+      <div class="eye" style="inset:40.77% 69.07% 57.69% 28.87%"></div><div class="eye" style="inset:40.77% 61.86% 57.69% 36.08%"></div>
+      <div class="eye" style="inset:53.85% 85.57% 44.62% 12.37%"></div><div class="eye" style="inset:53.85% 78.35% 44.62% 19.59%"></div>
+    </div>
+
+    </div><!-- /hero-scene -->
+
+    <!-- game layers (filled by game.js) -->
+    <div id="bg" aria-hidden="true"></div>
+    <div id="level"></div>
+    <div id="hud" aria-hidden="true">
+      <span>COINS <b id="hud-coins">00</b></span>
+      <span>DIST <b id="hud-dist">0000</b>m</span>
+      <span>LIVES <b class="inf">∞</b></span>
+    </div>
+    <div id="bubble" class="bubble" role="status" aria-live="polite"><span></span></div>
+    <div id="hint" aria-hidden="true">SCROLL OR ARROWS TO MOVE &nbsp;&nbsp; CLICK OR SPACE TO JUMP</div>
+    <div id="touch" aria-hidden="true">
+      <button class="tbtn left"  data-key="left"  type="button">◀</button>
+      <button class="tbtn right" data-key="right" type="button">▶</button>
+      <button class="tbtn jump"  data-key="jump"  type="button">A</button>
+    </div>
+
+    <!-- 3D brick plumber (replaces the Mario image) -->
+    <div id="plumber" class="abs" role="button" tabindex="0" aria-label="Brick plumber character. Click to jump."></div>
+
+  </main>
+ </div>
+</div>
+
+<div id="rotate" role="status">ROTATE YOUR PHONE<br>TO PLAY</div>
+
+<script>
+  // Scale the 1920x1080 stage to fit the viewport (never cropped), anchored to the ground.
+  // Wider viewports get the ground extended on both sides; taller ones get more sky.
+  const world = document.getElementById('world');
+  let stageScale = 1;
+  function fit() {
+    const s = Math.min(innerWidth / 1920, innerHeight / 1080);
+    stageScale = s;
+    world.style.setProperty('--s', s);
+    dispatchEvent(new CustomEvent('stagescale', { detail: s }));
+  }
+  addEventListener('resize', fit); fit();
+
+</script>
+
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://cdn.jsdelivr.net/npm/three@0.180.0/build/three.module.js",
+    "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.180.0/examples/jsm/"
+  }
+}
+</script>
+<script type="module">
+  import * as THREE from 'three';
+  import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+
+  const host = document.getElementById('plumber');
+  const W = host.clientWidth, H = host.clientHeight;
+  const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+  renderer.setSize(W, H);
+  renderer.outputColorSpace = THREE.SRGBColorSpace;
+  renderer.toneMapping = THREE.NoToneMapping;
+  renderer.shadowMap.enabled = true;
+  renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+  host.appendChild(renderer.domElement);
+
+  // The stage is CSS-scaled, so render at enough pixels to stay crisp.
+  function syncPixelRatio(s) { renderer.setPixelRatio(Math.min(devicePixelRatio * s, 3)); }
+  syncPixelRatio(stageScale);
+  addEventListener('stagescale', e => syncPixelRatio(e.detail));
+
+  const scene = new THREE.Scene();
+  const camera = new THREE.PerspectiveCamera(26, W / H, 0.1, 200);
+
+  scene.add(new THREE.HemisphereLight(0xffffff, 0x6986fe, 1.1));
+  const key = new THREE.DirectionalLight(0xffffff, 2.2);
+  key.position.set(6, 12, 8);
+  key.castShadow = true;
+  key.shadow.mapSize.set(2048, 2048);
+  key.shadow.bias = -0.0005;
+  scene.add(key);
+  const fill = new THREE.DirectionalLight(0xffffff, 0.7);
+  fill.position.set(-8, 5, 6);
+  scene.add(fill);
+  const rim = new THREE.DirectionalLight(0xffffff, 0.5);
+  rim.position.set(0, 6, -10);
+  scene.add(rim);
+
+  const pivot = new THREE.Group();
+  scene.add(pivot);
+
+  const BASE_YAW = 0.35;      // slight 3/4 pose like the design
+  let targetYaw = 0, yaw = 0, modelH = 1, modelRoot = null;
+  const joints = {};
+  let headPivot = null, headYaw = 0, headPitch = 0;
+
+  new GLTFLoader().load('assets/brick-plumber.glb', (gltf) => {
+    const model = gltf.scene;
+    model.traverse(o => { if (o.isMesh) { o.castShadow = true; o.receiveShadow = true; } });
+
+    const box = new THREE.Box3().setFromObject(model);
+    const size = box.getSize(new THREE.Vector3());
+    const center = box.getCenter(new THREE.Vector3());
+    model.position.set(-center.x, -box.min.y, -center.z);   // feet on y = 0, centred
+    pivot.add(model);
+    modelH = size.y;
+    modelRoot = model;
+
+    // capture limb joints (empty groups at the hip/shoulder pivots) and their rest pose
+    for (const name of ['hip_left', 'hip_right', 'shoulder_left', 'shoulder_right']) {
+      const j = model.getObjectByName(name);
+      if (j) joints[name] = { node: j, rest: j.quaternion.clone() };
+    }
+
+    // head rig: the head pieces are loose siblings, so gather them under a pivot at the neck
+    const headNode = model.getObjectByName('head');
+    if (headNode) {
+      model.updateMatrixWorld(true);
+      headPivot = new THREE.Group();
+      headPivot.rotation.order = 'YXZ';
+      headPivot.position.copy(headNode.position);
+      headPivot.position.y -= 4.4;                 // base of the head block
+      headNode.parent.add(headPivot);
+      for (const name of ['head', 'eye_left', 'eye_right', 'nose', 'mustache', 'mustache_tip_left', 'mustache_tip_right',
+                          'sideburn_left', 'sideburn_right', 'hair_back', 'cap_crown', 'cap_dome', 'cap_brim', 'cap_badge', 'cap_stud']) {
+        const part = model.getObjectByName(name);
+        if (part) headPivot.attach(part);          // keeps each piece exactly where it was
+      }
+    }
+
+    // contact shadow on the "grass"
+    const ground = new THREE.Mesh(
+      new THREE.PlaneGeometry(size.y * 3, size.y * 3),
+      new THREE.ShadowMaterial({ opacity: 0.22 })
+    );
+    ground.rotation.x = -Math.PI / 2;
+    ground.receiveShadow = true;
+    scene.add(ground);
+
+    const r = size.y;
+    key.shadow.camera.left = -r; key.shadow.camera.right = r;
+    key.shadow.camera.top = r;  key.shadow.camera.bottom = -r;
+    key.shadow.camera.near = 1; key.shadow.camera.far = 60;
+    key.shadow.camera.updateProjectionMatrix();
+
+    // frame the model: ~50% of the canvas height so there is headroom to jump,
+    // feet about 8% above the bottom edge, slight downward look
+    const fov = THREE.MathUtils.degToRad(camera.fov);
+    const visibleH = size.y / 0.5;
+    const dist = (visibleH / 2) / Math.tan(fov / 2);
+    const elev = THREE.MathUtils.degToRad(9);
+    const lookY = visibleH * 0.42;
+    camera.position.set(0, lookY + dist * Math.sin(elev), dist * Math.cos(elev));
+    camera.lookAt(0, lookY, 0);
+  }, undefined, (err) => {
+    console.error('GLB failed to load', err);
+    const note = document.createElement('div');
+    note.className = 'fallback';
+    note.textContent = 'model failed to load';
+    host.appendChild(note);
+  });
+
+  // Gentle idle: turn toward the cursor and bob.
+  addEventListener('pointermove', (e) => {
+    if (!gameMode) targetYaw = ((e.clientX / innerWidth) - 0.5) * 0.9;
+  }, { passive: true });
+
+  // ---------- click to jump ----------
+  const JUMP_TIME = 0.95;              // seconds in the air
+  let jumpStart = -1, landAt = -1, squash = 0;
+  const raycaster = new THREE.Raycaster();
+  const ndc = new THREE.Vector2();
+  const qTmp = new THREE.Quaternion();
+  const X_AXIS = new THREE.Vector3(1, 0, 0);
+
+  function hitModel(e) {
+    if (!modelRoot) return false;
+    const r = renderer.domElement.getBoundingClientRect();   // already CSS-scaled with the stage
+    ndc.set(((e.clientX - r.left) / r.width) * 2 - 1, -((e.clientY - r.top) / r.height) * 2 + 1);
+    raycaster.setFromCamera(ndc, camera);
+    return raycaster.intersectObject(modelRoot, true).length > 0;
+  }
+
+  function jump() {
+    const now = clock.getElapsedTime();
+    if (jumpStart >= 0 && now - jumpStart < JUMP_TIME) return;   // already airborne
+    jumpStart = now;
+  }
+
+  const stageEl = document.getElementById('stage');
+  stageEl.addEventListener('pointerdown', (e) => { if (!gameMode && hitModel(e)) { e.preventDefault(); jump(); } });
+  stageEl.addEventListener('pointermove', (e) => { if (!gameMode) document.body.style.cursor = hitModel(e) ? 'pointer' : ''; }, { passive: true });
+  window.plumberJump = jump;   // handy for demos / console
+  host.addEventListener('keydown', (e) => { if (!gameMode && (e.key === ' ' || e.key === 'Enter')) { e.preventDefault(); jump(); } });
+
+  // rotate a joint about its local X axis, relative to its rest pose
+  function swing(name, angle) {
+    const j = joints[name]; if (!j) return;
+    qTmp.setFromAxisAngle(X_AXIS, angle);
+    j.node.quaternion.copy(j.rest).multiply(qTmp);
+  }
+
+  const ease = (x) => 1 - Math.pow(1 - x, 3);
+
+  let freezeT = null;            // debug: window.plumberFreeze(0.5) holds the pose at that point of the arc
+  window.plumberFreeze = (t) => { freezeT = t; if (t != null) jumpStart = 0; };
+  function animateJump(now) {
+    if (jumpStart < 0) return false;
+    const t = freezeT != null ? freezeT : (now - jumpStart) / JUMP_TIME;
+    if (t >= 1) {
+      // land: reset pose, start a squash
+      for (const n in joints) joints[n].node.quaternion.copy(joints[n].rest);
+      jumpStart = -1; landAt = now; squash = 1;
+      return false;
+    }
+    // parabolic arc
+    pivot.position.y = 4 * t * (1 - t) * modelH * 0.5;
+
+    // arms: throw up fast, then pump up/down while airborne
+    const up = ease(Math.min(1, t * 2.5));
+    const pump = Math.sin(t * Math.PI * 4);
+    swing('shoulder_left',  -2.3 * up + 0.45 * pump);
+    swing('shoulder_right', -2.3 * up - 0.45 * pump);
+
+    // legs: alternate kick forward/back, tucked a little at the apex
+    const kick = Math.sin(t * Math.PI * 3);
+    const tuck = 4 * t * (1 - t) * 0.35;
+    swing('hip_left',   0.8 * kick + tuck);
+    swing('hip_right', -0.8 * kick + tuck);
+
+    // slight forward lean into the jump
+    pivot.rotation.x = -0.12 * Math.sin(t * Math.PI);
+    return true;
+  }
+
+  // ---------- game-mode API (used by game.js) ----------
+  let gameMode = false, walkPhase = 0, blink = false;
+  const FRONT_YAW = 0.2;                 // model faces the camera
+  const SIDE_YAW = 1.15;                 // how far it turns toward the direction of travel
+  window.plumber = {
+    get ready() { return !!modelRoot; },
+    get head() { return { yaw: headYaw, pitch: headPitch, rigged: !!headPivot }; },
+    setGame(active) {
+      gameMode = active;
+      host.classList.toggle('in-game', active);
+      if (active) { jumpStart = -1; freezeT = null; pivot.rotation.x = 0; }
+    },
+    // called every frame by the game: screen position of the feet + animation state
+    pose({ screenX, feetY, facing, vx, grounded, hurt, dt, t, look = null, mood = null }) {
+      host.style.transform = `translate(${(screenX - 250).toFixed(1)}px, ${(feetY - 715).toFixed(1)}px)`;
+      targetYaw = FRONT_YAW - BASE_YAW + facing * SIDE_YAW;
+      if (!modelRoot) return;
+
+      // head: turn toward a point of interest (a billboard behind him), else face forward
+      let wantYaw = 0, wantPitch = 0;
+      if (mood === 'sad') { wantYaw = 0; wantPitch = 0.62; }          // head hangs down
+      else if (look && headPivot) {
+        const k = modelH / 400;                              // stage px -> model units (he is ~400px tall)
+        const dx = look.dx * k, up = -look.dy * k, depth = modelH * 1.6;   // boards sit behind him
+        const bodyYaw = pivot.rotation.y - FRONT_YAW;         // 0 = facing the camera
+        let rel = Math.atan2(dx, -depth) - bodyYaw;
+        rel = Math.atan2(Math.sin(rel), Math.cos(rel));       // wrap to [-pi, pi]
+        wantYaw = Math.max(-1.35, Math.min(1.35, rel));
+        wantPitch = Math.max(-0.65, Math.min(0.3, -Math.atan2(up, Math.hypot(dx, depth))));
+      }
+      headYaw += (wantYaw - headYaw) * 0.1;
+      headPitch += (wantPitch - headPitch) * 0.1;
+      if (headPivot) { headPivot.rotation.y = headYaw; headPivot.rotation.x = headPitch; }
+
+      const speed = Math.abs(vx);
+      if (hurt) {
+        blink = Math.floor(t * 14) % 2 === 0;
+        modelRoot.visible = !blink;
+        swing('shoulder_left', -2.2); swing('shoulder_right', -2.2);
+        swing('hip_left', 0.6); swing('hip_right', -0.6);
+        pivot.position.y = 0;
+      } else {
+        modelRoot.visible = true;
+        if (!grounded) {
+          // classic one-arm-up jump
+          swing('shoulder_left', facing > 0 ? -2.5 : 0.5);
+          swing('shoulder_right', facing > 0 ? 0.5 : -2.5);
+          swing('hip_left', 0.7); swing('hip_right', -0.45);
+          pivot.position.y = 0;
+        } else if (speed > 30) {
+          walkPhase += speed * dt / 42;
+          const sw = Math.sin(walkPhase);
+          swing('hip_left', 0.75 * sw); swing('hip_right', -0.75 * sw);
+          swing('shoulder_left', -0.65 * sw); swing('shoulder_right', 0.65 * sw);
+          pivot.position.y = Math.abs(Math.cos(walkPhase)) * modelH * 0.012;
+        } else {
+          for (const n in joints) joints[n].node.quaternion.copy(joints[n].rest);
+          pivot.position.y = 0;
+        }
+      }
+    },
+  };
+
+  const clock = new THREE.Clock();
+  function frame() {
+    requestAnimationFrame(frame);
+    const t = clock.getElapsedTime();
+    yaw += (targetYaw - yaw) * (gameMode ? 0.18 : 0.06);
+    pivot.rotation.y = reduceMotion && !gameMode ? BASE_YAW : BASE_YAW + yaw;
+
+    if (gameMode) { pivot.scale.set(1, 1, 1); renderer.render(scene, camera); return; }
+
+    const airborne = animateJump(t);
+    if (!airborne) {
+      pivot.rotation.x = 0;
+      pivot.position.y = reduceMotion ? 0 : Math.max(0, Math.sin(t * 2.2)) * modelH * 0.01;
+    }
+
+    // landing squash & stretch (spring back)
+    if (squash > 0) {
+      squash = Math.max(0, squash - 0.06);
+      const k = Math.sin(squash * Math.PI) * 0.18;
+      pivot.scale.set(1 + k, 1 - k, 1 + k);
+    } else {
+      pivot.scale.set(1, 1, 1);
+    }
+
+    renderer.render(scene, camera);
+  }
+  frame();
+</script>
+
+<script type="module">
+  import { initCRT } from './crt.js?v=20261019j';
+  initCRT({ target: '#world', mount: '#chrome-controls' });
+</script>
+<script src="chrome.js?v=20261019j"></script>
+<script type="module" src="game.js?v=20261019j"></script>
+</body>
+</html>
