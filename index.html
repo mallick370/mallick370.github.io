@@ -7,8 +7,8 @@
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Inter:wght@500;600&family=Space+Grotesk:wght@400;500&display=swap" rel="stylesheet" />
-<link rel="stylesheet" href="chrome.css?v=20261019j" />
-<link rel="stylesheet" href="crt.css?v=20261019j" />
+<link rel="stylesheet" href="chrome.css?v=20261019l" />
+<link rel="stylesheet" href="crt.css?v=20261019l" />
 <style>
   :root {
     --sky: #6986fe;
@@ -261,7 +261,7 @@
 <nav class="bar" aria-label="Pages">
   <a href="index.html" class="on" aria-current="page">Works</a>
   <a href="about.html">About</a>
-  <a href="mailto:mallick370@gmail.com">Contact</a>
+  <button id="contactBtn" type="button">Contact</button>
   <span class="divider"></span>
   <button id="helpBtn" type="button" aria-label="Help">?</button>
 </nav>
@@ -645,10 +645,10 @@
 </script>
 
 <script type="module">
-  import { initCRT } from './crt.js?v=20261019j';
+  import { initCRT } from './crt.js?v=20261019l';
   initCRT({ target: '#world', mount: '#chrome-controls' });
 </script>
-<script src="chrome.js?v=20261019j"></script>
-<script type="module" src="game.js?v=20261019j"></script>
+<script src="chrome.js?v=20261019l"></script>
+<script type="module" src="game.js?v=20261019l"></script>
 </body>
 </html>

@@ -381,7 +381,7 @@ const KEYMAP = { ArrowLeft: 'left', a: 'left', A: 'left', ArrowRight: 'right', d
 addEventListener('keydown', (e) => {
   if (!playing) return;
   const k = KEYMAP[e.key]; if (!k) return;
-  if (e.target && e.target.closest && e.target.closest('input, textarea, [role=slider]')) return;
+  if (e.target && e.target.closest && e.target.closest('input, textarea, [role=slider], .contact')) return;
   e.preventDefault(); keys[k] = true;
 });
 addEventListener('keyup', (e) => { const k = KEYMAP[e.key]; if (k) keys[k] = false; });
@@ -390,7 +390,7 @@ addEventListener('blur', () => { keys.left = keys.right = keys.jump = false; });
 // primary click / trackpad click / tap anywhere = jump (nav, menu and touch buttons excepted)
 document.addEventListener('pointerdown', (e) => {
   if (!playing || e.button !== 0) return;
-  if (e.target && e.target.closest && e.target.closest('.tbtn, .tools, .crumb, .bar, .help, .billboard, .tower')) return;
+  if (e.target && e.target.closest && e.target.closest('.tbtn, .tools, .crumb, .bar, .help, .billboard, .tower, .contact')) return;
   keys.jump = true; setTimeout(() => { keys.jump = false; }, 120);
 });
 
@@ -398,7 +398,7 @@ document.addEventListener('pointerdown', (e) => {
 let scrollDir = 0, scrollT = 0;
 addEventListener('wheel', (e) => {
   if (!playing) return;
-  if (e.target && e.target.closest && e.target.closest('.tools, .bar')) return;   // volume dial keeps its own wheel
+  if (e.target && e.target.closest && e.target.closest('.tools, .bar, .contact')) return;   // volume dial keeps its own wheel
   e.preventDefault();
   const d = Math.abs(e.deltaX) > Math.abs(e.deltaY) ? e.deltaX : e.deltaY;
   if (Math.abs(d) < 0.5) return;

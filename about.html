@@ -8,8 +8,8 @@
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Space+Grotesk:wght@400;500&display=swap" rel="stylesheet" />
-<link rel="stylesheet" href="chrome.css?v=20261019j" />
-<link rel="stylesheet" href="crt.css?v=20261019j" />
+<link rel="stylesheet" href="chrome.css?v=20261019l" />
+<link rel="stylesheet" href="crt.css?v=20261019l" />
 <style>
   :root {
     --canvas: #f3f3f5;
@@ -272,7 +272,7 @@
 <nav class="bar" aria-label="Pages">
   <a href="index.html">Works</a>
   <a href="about.html" class="on" aria-current="page">About</a>
-  <a href="mailto:mallick370@gmail.com">Contact</a>
+  <button id="contactBtn" type="button">Contact</button>
   <span class="divider"></span>
   <div class="pager">
     <button id="prev" type="button" aria-label="Previous frame"><svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M7.5 2.5 4 6l3.5 3.5"/></svg></button>
@@ -396,7 +396,7 @@
 
   setActive(0);
 </script>
-<script src="chrome.js?v=20261019j"></script>
+<script src="chrome.js?v=20261019l"></script>
 <script type="importmap">
 {
   "imports": {
@@ -406,7 +406,7 @@
 }
 </script>
 <script type="module">
-  import { initCRT } from './crt.js?v=20261019j';
+  import { initCRT } from './crt.js?v=20261019l';
   initCRT({ target: '#canvas', mount: '#chrome-controls' });
 </script>
 </body>
