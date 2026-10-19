@@ -8,6 +8,10 @@ import * as THREE from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 
 const STAGE_W = 1920;
+// phones: the plumber runs by himself, a tap jumps, and he stops at every billboard and the office
+const MOBILE = matchMedia('(pointer: coarse)').matches && Math.min(innerWidth, innerHeight) <= 820;
+// the slice of the 1920px stage that is actually on screen (portrait phones see the middle of it)
+function view() { const s = stageScaleNow(); const w = Math.min(STAGE_W, innerWidth / s); return { l: (STAGE_W - w) / 2, w }; }
 const GROUND_TOP = 1005;                   // y of the hero's grass
 const LEVELS = [1005, 878, 750];           // platform tops Mario can reach by jumping
 
@@ -138,6 +142,7 @@ const player = {
   safeX: 580, safeTop: GROUND_TOP, stepT: 0,
 };
 let cameraX = 0, playing = false, lastT = 0, hintT = 0;
+let halt = null;                                   // mobile: { board, shown } while he waits in front of something
 
 // ---------- level pieces ----------
 function addPlatform(x, top, w, kind = 'md') {
@@ -390,7 +395,8 @@ addEventListener('blur', () => { keys.left = keys.right = keys.jump = false; });
 // primary click / trackpad click / tap anywhere = jump (nav, menu and touch buttons excepted)
 document.addEventListener('pointerdown', (e) => {
   if (!playing || e.button !== 0) return;
-  if (e.target && e.target.closest && e.target.closest('.tbtn, .tools, .crumb, .bar, .help, .billboard, .tower, .contact')) return;
+  if (e.target && e.target.closest && e.target.closest('.tbtn, .tools, .crumb, .bar, .help, .billboard, .tower, .contact, .choice, .ham, .menu')) return;
+  if (halt && halt.shown) return;                                        // waiting on the Run / View choice
   keys.jump = true; setTimeout(() => { keys.jump = false; }, 120);
 });
 
@@ -413,6 +419,26 @@ for (const b of document.querySelectorAll('.tbtn')) {
   b.addEventListener('pointercancel', up); b.addEventListener('pointerleave', up);
 }
 
+// ---------- mobile choice panel: Keep running / View case study ----------
+const choiceEl = document.getElementById('choice');
+function showChoice(board) {
+  if (!choiceEl) return;
+  const proj = board.key ? BILLBOARDS.find(b => b.key === board.key) : null;
+  choiceEl.querySelector('.choice-title').textContent = proj ? proj.title : 'AURASELL HQ';
+  const viewBtn = choiceEl.querySelector('.choice-view');
+  viewBtn.hidden = !proj;
+  choiceEl.hidden = false;
+  requestAnimationFrame(() => choiceEl.classList.add('show'));
+}
+function hideChoice() { if (choiceEl) { choiceEl.classList.remove('show'); choiceEl.hidden = true; } }
+if (choiceEl) {
+  choiceEl.querySelector('.choice-run').addEventListener('click', () => { hideChoice(); halt = null; });
+  choiceEl.querySelector('.choice-view').addEventListener('click', () => {
+    const b = halt && halt.board; hideChoice(); halt = null;
+    if (b && b.el && b.el.click) b.el.click();                         // same path as tapping the billboard itself
+  });
+}
+
 // ---------- physics ----------
 function groundAt(x) {                      // slope surface height at x, or Infinity
   let y = Infinity;
@@ -425,7 +451,8 @@ function step(dt) {
   const p = player;
   // horizontal
   if (scrollT > 0) scrollT -= dt;
-  const want = ((keys.right ? 1 : 0) - (keys.left ? 1 : 0)) || (scrollT > 0 ? scrollDir : 0);
+  let want = ((keys.right ? 1 : 0) - (keys.left ? 1 : 0)) || (scrollT > 0 ? scrollDir : 0);
+  if (MOBILE) want = halt ? 0 : 1;                                     // auto-runner
   if (p.hurtT > P.invuln - 0.35) { /* knocked back: no control for a moment */ }
   else if (want) { p.vx += want * P.accel * dt; p.facing = want; }
   else { const s = Math.sign(p.vx); p.vx -= s * Math.min(Math.abs(p.vx), P.decel * dt); }
@@ -507,13 +534,27 @@ function step(dt) {
   // camera: dead zone, never scrolls past the start
   const sx = p.x - cameraX;
   let target = cameraX;
-  if (sx > 760) target = p.x - 760; else if (sx < 460) target = p.x - 460;
+  const v = view(), lo = v.l + v.w * 0.24, hi = v.l + v.w * 0.396;
+  if (sx > hi) target = p.x - hi; else if (sx < lo) target = p.x - lo;
   cameraX += (Math.max(0, target) - cameraX) * Math.min(1, dt * 9);
 
   // world upkeep
   generate(cameraX + STAGE_W + 900);
   genBackground(cameraX * 0.35 + STAGE_W + 600);
   if (((lastT * 2) | 0) % 2 === 0) cull();
+
+  // mobile: pull up in front of each billboard and the office, then offer a choice
+  if (MOBILE && !halt) {
+    for (const b of boards) {
+      if (b.stopped) continue;
+      const stopX = b.zone ? b.zone[0] + 40 : b.x - 300;
+      if (p.x >= stopX && p.x < stopX + 400) { b.stopped = true; halt = { board: b, shown: false, t: 0 }; break; }
+    }
+  }
+  if (halt) {
+    halt.t += dt;
+    if (!halt.shown && p.grounded && Math.abs(p.vx) < 20 && halt.t > 0.3) { halt.shown = true; showChoice(halt.board); }
+  }
 
   // HUD
   p.best = Math.max(p.best, p.x);
@@ -575,7 +616,8 @@ function render(dt, t) {
 
   // bubble follows his head
   if (bubble && t < bubble.until) {
-    const bx = Math.max(300, Math.min(STAGE_W - 300, p.x - cameraX + 30));
+    const v = view(), half = Math.min(bubbleEl.offsetWidth / 2 + 20, v.w / 2);
+    const bx = Math.max(v.l + half, Math.min(v.l + v.w - half, p.x - cameraX + 30));
     bubbleEl.style.transform = `translate(${bx.toFixed(0)}px, ${(p.feet - 445).toFixed(0)}px) translate(-50%, -100%)`;
   } else if (bubble) { bubble = null; bubbleEl.classList.remove('show'); }
 }
@@ -602,7 +644,7 @@ function startGame() {
   genBackground(STAGE_W + 600);
   window.plumber.setGame(true);
   hint.classList.add('show'); hintT = 5;
-  if (matchMedia('(pointer: coarse)').matches) hint.textContent = 'BUTTONS MOVE   A JUMP';
+  if (MOBILE) hint.textContent = 'TAP TO JUMP';
   lastT = 0;
   requestAnimationFrame(loop);
 }
@@ -618,11 +660,11 @@ function resumeAt(key, saved) {
   let board = null;
   for (let guard = 0; guard < 40 && !board; guard++) { generate(genX + 800); board = boards.find(b => b.key === key); }
   if (!board) return false;
-  board.greeted = true; board.visited = true; board.mourned = true;
+  board.greeted = true; board.visited = true; board.mourned = true; board.stopped = true;
   const p = player, ground = board.y + BB_H - 8;
   p.x = board.x - 340; p.feet = ground; p.safeX = p.x; p.safeTop = ground; p.vx = 0; p.vy = 0;
   if (saved) { p.coins = saved.coins || 0; p.best = Math.max(p.x, saved.best || 0); }
-  cameraX = Math.max(0, p.x - 640);
+  cameraX = Math.max(0, p.x - (view().l + view().w * 0.33));
   generate(cameraX + STAGE_W + 900); genBackground(cameraX * 0.35 + STAGE_W + 600);
   hint.classList.remove('show'); hintT = 0;
   return true;

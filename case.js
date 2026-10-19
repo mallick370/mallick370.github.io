@@ -6,6 +6,9 @@ const io = new IntersectionObserver((entries) => {
   for (const en of entries) if (en.isIntersecting) { en.target.classList.add('in'); io.unobserve(en.target); }
 }, { root: page, threshold: 0.12, rootMargin: '0px 0px -8% 0px' });
 document.querySelectorAll('.r').forEach(el => io.observe(el));
+// what is already on screen appears at once (no waiting on the observer, which background tabs throttle)
+const revealVisible = () => { const vh = page.clientHeight; for (const el of document.querySelectorAll('.r:not(.in)')) if (el.getBoundingClientRect().top < vh * 0.92) { el.classList.add('in'); io.unobserve(el); } };
+revealVisible(); setTimeout(revealVisible, 80);
 
 // sticky chip follows the section in view
 const chip = document.getElementById('chip'), chipText = chip.querySelector('span');

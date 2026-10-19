@@ -12,8 +12,8 @@
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Space+Grotesk:wght@400;500&display=swap" rel="stylesheet" />
-<link rel="stylesheet" href="chrome.css?v=20261019l" />
-<link rel="stylesheet" href="crt.css?v=20261019l" />
+<link rel="stylesheet" href="chrome.css?v=20261019o" />
+<link rel="stylesheet" href="crt.css?v=20261019o" />
 <style>
   :root {
     --canvas: #f3f3f5;
@@ -286,7 +286,7 @@
   <span class="divider"></span>
   <button id="helpBtn" type="button" aria-label="Help">?</button>
 </nav>
-<div class="help" id="help" role="status">Use <kbd>←</kbd> <kbd>→</kbd> or scroll sideways to move between frames</div>
+<div class="help" id="help" role="status" data-mobile="Scroll down to move between frames · tap a sticky note to read it">Use <kbd>←</kbd> <kbd>→</kbd> or scroll sideways to move between frames</div>
 
 <script>
   const canvas = document.getElementById('canvas');
@@ -400,7 +400,7 @@
 
   setActive(0);
 </script>
-<script src="chrome.js?v=20261019l"></script>
+<script src="chrome.js?v=20261019o"></script>
 <script type="importmap">
 {
   "imports": {
@@ -410,7 +410,7 @@
 }
 </script>
 <script type="module">
-  import { initCRT } from './crt.js?v=20261019l';
+  import { initCRT } from './crt.js?v=20261019o';
   initCRT({ target: '#canvas', mount: '#chrome-controls' });
 </script>
 </body>

@@ -1,4 +1,7 @@
-// shared chrome behaviour: the "?" help bubble and the Contact keycap overlay in the bottom toolbar
+// shared chrome behaviour: the "?" help bubble, the Contact keycap overlay and, on phones, the hamburger menu
+const IS_MOBILE = matchMedia('(pointer: coarse)').matches && Math.min(innerWidth, innerHeight) <= 820;
+document.documentElement.classList.toggle('mobile', IS_MOBILE);
+window.IS_MOBILE = IS_MOBILE;
 const help = document.getElementById('help'), helpBtn = document.getElementById('helpBtn');
 if (help && helpBtn) {
   let hide = 0;
@@ -72,4 +75,24 @@ if (contactBtn) {
     try { await navigator.clipboard.writeText(EMAIL); copy.classList.add('ok'); copy.setAttribute('aria-label', 'Copied'); setTimeout(() => { copy.classList.remove('ok'); copy.setAttribute('aria-label', 'Copy email'); }, 1400); }
     catch { window.prompt('Copy the address', EMAIL); }
   });
+}
+
+// ---------- phones: the bottom toolbar folds into a hamburger menu at the top ----------
+const bar = document.querySelector('.bar');
+if (IS_MOBILE && bar) {
+  const ham = document.createElement('button');
+  ham.className = 'ham'; ham.type = 'button'; ham.setAttribute('aria-label', 'Menu'); ham.setAttribute('aria-expanded', 'false');
+  ham.innerHTML = '<span></span><span></span><span></span>';
+  const menu = document.createElement('nav');
+  menu.className = 'menu'; menu.setAttribute('aria-label', 'Pages');
+  const links = [...bar.querySelectorAll(':scope > a')].map(a =>
+    `<a href="${a.getAttribute('href')}"${a.classList.contains('on') ? ' class="on" aria-current="page"' : ''}>${a.textContent.trim()}</a>`).join('');
+  menu.innerHTML = links + (contactBtn ? '<button type="button" class="menu-contact">Contact</button>' : '')
+    + (help ? `<p class="menu-help">${help.dataset.mobile || help.innerHTML}</p>` : '');
+  document.body.append(ham, menu);
+  const setOpen = (o) => { ham.classList.toggle('open', o); menu.classList.toggle('open', o); ham.setAttribute('aria-expanded', String(o)); };
+  ham.addEventListener('click', () => setOpen(!menu.classList.contains('open')));
+  const mc = menu.querySelector('.menu-contact');
+  if (mc) mc.addEventListener('click', () => { setOpen(false); contactBtn.click(); });
+  document.addEventListener('pointerdown', (e) => { if (menu.classList.contains('open') && !e.target.closest('.menu, .ham')) setOpen(false); });
 }

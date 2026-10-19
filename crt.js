@@ -37,6 +37,12 @@ const KNOBS_HTML = `
 </button>`;
 
 export function initCRT({ target, mount }) {
+// phones and small tablets: no tube, no knobs (for now)
+if (matchMedia('(pointer: coarse)').matches && Math.min(innerWidth, innerHeight) <= 820) {
+  document.body.classList.add('no-crt');
+  window.crtGlitch = () => {};
+  return;
+}
 document.body.insertAdjacentHTML('beforeend', FILTER_SVG);
 const mountEl = document.querySelector(mount);
 mountEl.insertAdjacentHTML('beforeend', KNOBS_HTML);

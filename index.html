@@ -11,8 +11,8 @@
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Inter:wght@500;600&family=Space+Grotesk:wght@400;500&display=swap" rel="stylesheet" />
-<link rel="stylesheet" href="chrome.css?v=20261019l" />
-<link rel="stylesheet" href="crt.css?v=20261019l" />
+<link rel="stylesheet" href="chrome.css?v=20261019o" />
+<link rel="stylesheet" href="crt.css?v=20261019o" />
 <style>
   :root {
     --sky: #6986fe;
@@ -25,13 +25,14 @@
   html, body { margin: 0; height: 100%; }
   body {
     background: var(--sky);
-    overflow: hidden;
+    overflow: hidden; touch-action: manipulation;
     font-family: Helvetica, Arial, sans-serif;
     -webkit-font-smoothing: antialiased;
   }
 
   /* 1920x1080 design canvas, scaled to the viewport */
   #viewport { position: fixed; inset: 0; overflow: hidden; }
+  body.playing #viewport { touch-action: none; }
   #world { position: absolute; inset: 0; }
   #stage {
     position: absolute;
@@ -132,7 +133,7 @@
   .hill .eye { position: absolute; background: #000; }
 
   /* 3D plumber */
-  #plumber { left: 330px; top: 290px; width: 500px; height: 800px; pointer-events: none; z-index: 1; }
+  #plumber { left: var(--pl, 330px); top: 290px; width: 500px; height: 800px; pointer-events: none; z-index: 1; }
   .nav, .title, .cta { z-index: 2; }
   #plumber canvas { display: block; width: 100%; height: 100%; touch-action: manipulation; }
   #plumber:focus-visible { outline: 3px dashed #fff; outline-offset: -3px; }
@@ -187,7 +188,7 @@
   .bubble {
     position: absolute; left: 0; top: 0; z-index: 3; transform: translate(-50%, -100%);
     background: #fff; color: #000; border: 4px solid #000; border-radius: 6px; padding: 16px 20px;
-    font: 15px/1.7 'Press Start 2P', monospace; text-align: center; white-space: normal; max-width: 640px; width: max-content;
+    font: 15px/1.7 'Press Start 2P', monospace; font-size: max(15px, calc(10.5px / var(--s, 1))); text-align: center; white-space: normal; max-width: min(640px, calc(var(--vw, 1920px) - 80px)); width: max-content;
     box-shadow: 6px 6px 0 rgba(0,0,0,.35); pointer-events: none;
     opacity: 0; transition: opacity .18s ease; will-change: transform;
   }
@@ -209,15 +210,17 @@
   #plumber.in-game { left: 0; top: 0; will-change: transform; }
 
   #hud {
-    position: absolute; left: 60px; top: max(64px, calc(60px / var(--s, 1))); z-index: 3; display: none; gap: 48px;
+    position: absolute; left: calc(var(--vl, 0px) + 60px); top: calc(var(--vt, 0px) + max(64px, calc(60px / var(--s, 1)))); z-index: 3; display: none; gap: 48px;
     font-family: 'Press Start 2P', monospace; font-size: max(22px, calc(13px / var(--s, 1))); color: #fff; text-shadow: 3px 3px 0 #000; white-space: nowrap;
   }
   #hud b { color: #ffdcc5; font-weight: 400; }
+  html.mobile #hud { gap: 28px; font-size: max(20px, calc(11px / var(--s, 1))); }
+  html.mobile #hud span:nth-child(3) { display: none; }
   #hud .inf { font-size: 30px; line-height: 0; vertical-align: -4px; }
   #hud .pulse { animation: hud-pulse .5s ease-out; }
   @keyframes hud-pulse { 0% { transform: scale(1.6); color: #fff; } 100% { transform: scale(1); } }
   #hint {
-    position: absolute; left: 50%; top: max(170px, calc(130px / var(--s, 1))); transform: translateX(-50%); z-index: 3; display: none;
+    position: absolute; left: 50%; top: calc(var(--vt, 0px) + max(170px, calc(130px / var(--s, 1)))); transform: translateX(-50%); z-index: 3; display: none;
     font-family: 'Press Start 2P', monospace; font-size: max(20px, calc(12px / var(--s, 1))); color: #fff; text-shadow: 3px 3px 0 #000; white-space: nowrap;
     animation: hint-blink 1s steps(2) infinite;
   }
@@ -225,23 +228,25 @@
   body.playing #hud { display: flex; }
   body.playing #hint.show { display: block; }
 
-  #touch { position: absolute; inset: 0; z-index: 4; display: none; pointer-events: none; }
-  .tbtn {
-    position: absolute; bottom: 60px; width: 130px; height: 130px; border-radius: 50%; border: 4px solid rgba(255,255,255,.7);
-    background: rgba(0,0,0,.35); color: #fff; font: 40px/1 'Press Start 2P', monospace; pointer-events: auto;
-    -webkit-tap-highlight-color: transparent; touch-action: none; user-select: none;
-  }
-  .tbtn:active, .tbtn.held { background: rgba(255,255,255,.35); }
-  .tbtn.left { left: 50px; } .tbtn.right { left: 250px; } .tbtn.jump { right: 60px; width: 210px; height: 210px; bottom: 40px; }
-  .tbtn { width: 170px; height: 170px; bottom: 60px; }
-  @media (pointer: coarse) { body.playing #touch { display: block; } }
 
-  /* phones held upright: the 16:9 stage is too small to play */
-  #rotate {
-    position: fixed; inset: 0; z-index: 20; display: none; align-items: center; justify-content: center; text-align: center;
-    background: rgba(20, 30, 90, .92); color: #fff; font-family: 'Press Start 2P', monospace; font-size: 14px; line-height: 2; padding: 32px;
+  /* mobile: the Run / View choice when he stops in front of something (screen space, not stage space) */
+  .choice {
+    position: fixed; left: 50%; bottom: max(24px, env(safe-area-inset-bottom)); transform: translateX(-50%) translateY(16px); z-index: 12;
+    width: min(92vw, 420px); padding: 14px 16px 16px; background: #fff; color: #000; border: 4px solid #000; border-radius: 12px;
+    box-shadow: 6px 6px 0 rgba(0,0,0,.35); font-family: 'Press Start 2P', monospace; opacity: 0; transition: opacity .2s, transform .25s cubic-bezier(.2,.8,.2,1);
   }
-  @media (orientation: portrait) and (pointer: coarse) { body.playing #rotate { display: flex; } }
+  .choice.show { opacity: 1; transform: translateX(-50%); }
+  .choice[hidden] { display: none; }
+  .choice-title { margin: 0 0 12px; font-size: 11px; line-height: 1.5; color: #555; text-align: center; }
+  .choice-btns { display: grid; gap: 10px; }
+  .choice-btns a, .choice-btns button {
+    appearance: none; display: block; width: 100%; padding: 15px 12px; border-radius: 8px; border: 3px solid #000; font: 11px/1.3 'Press Start 2P', monospace;
+    text-align: center; text-decoration: none; cursor: pointer; -webkit-tap-highlight-color: transparent; box-shadow: 0 4px 0 #000; transition: transform .08s, box-shadow .08s;
+  }
+  .choice-btns a:active, .choice-btns button:active { transform: translateY(4px); box-shadow: none; }
+  .choice-view { background: var(--brick); color: #fff; }
+  .choice-run { background: #fff; color: #000; }
+  .choice-view[hidden] { display: none; }
 
   @media (prefers-reduced-motion: reduce) {
     .coin img, .piranha { animation: none; }
@@ -269,7 +274,7 @@
   <span class="divider"></span>
   <button id="helpBtn" type="button" aria-label="Help">?</button>
 </nav>
-<div class="help" id="help" role="status">Scroll or <kbd>←</kbd> <kbd>→</kbd> to run · click or <kbd>space</kbd> to jump · click the plumber before you start</div>
+<div class="help" id="help" role="status" data-mobile="He runs by himself · tap to jump · he stops at every billboard and at the office">Scroll or <kbd>←</kbd> <kbd>→</kbd> to run · click or <kbd>space</kbd> to jump · click the plumber before you start</div>
 
 <div id="viewport">
  <div id="world">
@@ -333,11 +338,6 @@
     </div>
     <div id="bubble" class="bubble" role="status" aria-live="polite"><span></span></div>
     <div id="hint" aria-hidden="true">SCROLL OR ARROWS TO MOVE &nbsp;&nbsp; CLICK OR SPACE TO JUMP</div>
-    <div id="touch" aria-hidden="true">
-      <button class="tbtn left"  data-key="left"  type="button">◀</button>
-      <button class="tbtn right" data-key="right" type="button">▶</button>
-      <button class="tbtn jump"  data-key="jump"  type="button">A</button>
-    </div>
 
     <!-- 3D brick plumber (replaces the Mario image) -->
     <div id="plumber" class="abs" role="button" tabindex="0" aria-label="Brick plumber character. Click to jump."></div>
@@ -346,7 +346,13 @@
  </div>
 </div>
 
-<div id="rotate" role="status">ROTATE YOUR PHONE<br>TO PLAY</div>
+<div id="choice" class="choice" hidden>
+  <p class="choice-title"></p>
+  <div class="choice-btns">
+    <a class="choice-view" href="#">VIEW CASE STUDY</a>
+    <button class="choice-run" type="button">KEEP RUNNING</button>
+  </div>
+</div>
 
 <script>
   // Scale the 1920x1080 stage to fit the viewport (never cropped), anchored to the ground.
@@ -354,9 +360,18 @@
   const world = document.getElementById('world');
   let stageScale = 1;
   function fit() {
-    const s = Math.min(innerWidth / 1920, innerHeight / 1080);
+    const mobile = matchMedia('(pointer: coarse)').matches && Math.min(innerWidth, innerHeight) <= 820;
+    const portrait = innerHeight > innerWidth;
+    let s = Math.min(innerWidth / 1920, innerHeight / 1080);                 // whole stage, never cropped
+    if (mobile && portrait) s = Math.min(innerWidth / 980, innerHeight / 1080);   // phone upright: a 980px-wide slice of the middle
+    else if (mobile) s = Math.min(innerWidth / 1920, innerHeight / 900);         // phone sideways: trim a little sky
     stageScale = s;
+    const vw = Math.min(1920, innerWidth / s), vl = (1920 - vw) / 2, vt = Math.max(0, 1080 - innerHeight / s);
     world.style.setProperty('--s', s);
+    world.style.setProperty('--vl', vl.toFixed(1) + 'px');
+    world.style.setProperty('--vw', vw.toFixed(1) + 'px');
+    world.style.setProperty('--vt', vt.toFixed(1) + 'px');
+    world.style.setProperty('--pl', (mobile && portrait ? vl + 20 : 330) + 'px');   // where he stands on the hero
     dispatchEvent(new CustomEvent('stagescale', { detail: s }));
   }
   addEventListener('resize', fit); fit();
@@ -649,10 +664,10 @@
 </script>
 
 <script type="module">
-  import { initCRT } from './crt.js?v=20261019l';
+  import { initCRT } from './crt.js?v=20261019o';
   initCRT({ target: '#world', mount: '#chrome-controls' });
 </script>
-<script src="chrome.js?v=20261019l"></script>
-<script type="module" src="game.js?v=20261019l"></script>
+<script src="chrome.js?v=20261019o"></script>
+<script type="module" src="game.js?v=20261019o"></script>
 </body>
 </html>
