@@ -4,7 +4,7 @@ document.documentElement.classList.toggle('mobile', IS_MOBILE);
 window.IS_MOBILE = IS_MOBILE;
 
 // ---------- visits: GoatCounter (no cookies, no personal data). One code to fill in. ----------
-const GC_CODE = 'GOATCOUNTER_CODE';            // e.g. 'mayukh' for https://mayukh.goatcounter.com
+const GC_CODE = 'mayukh';            // e.g. 'mayukh' for https://mayukh.goatcounter.com
 window.GC_CODE = GC_CODE;
 if (GC_CODE !== 'GOATCOUNTER_CODE' && !/^(localhost|127\.0\.0\.1)$/.test(location.hostname)) {
   const s = document.createElement('script');
