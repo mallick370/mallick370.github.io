@@ -2,6 +2,21 @@
 const IS_MOBILE = matchMedia('(pointer: coarse)').matches && Math.min(innerWidth, innerHeight) <= 820;
 document.documentElement.classList.toggle('mobile', IS_MOBILE);
 window.IS_MOBILE = IS_MOBILE;
+
+// ---------- visits: GoatCounter (no cookies, no personal data). One code to fill in. ----------
+const GC_CODE = 'GOATCOUNTER_CODE';            // e.g. 'mayukh' for https://mayukh.goatcounter.com
+window.GC_CODE = GC_CODE;
+if (GC_CODE !== 'GOATCOUNTER_CODE' && !/^(localhost|127\.0\.0\.1)$/.test(location.hostname)) {
+  const s = document.createElement('script');
+  s.async = true; s.src = 'https://gc.zgo.at/count.js';
+  s.dataset.goatcounter = `https://${GC_CODE}.goatcounter.com/count`;
+  document.head.appendChild(s);
+}
+// count a named interaction (start the game, open a case study from a billboard, open Contact)
+window.track = (name) => {
+  const gc = window.goatcounter;
+  if (gc && gc.count) gc.count({ path: 'event/' + name, title: name, event: true });
+};
 const help = document.getElementById('help'), helpBtn = document.getElementById('helpBtn');
 if (help && helpBtn) {
   let hide = 0;
@@ -49,7 +64,7 @@ if (contactBtn) {
   document.body.appendChild(ov);
 
   let lastFocus = null;
-  const open = () => { lastFocus = document.activeElement; ov.classList.add('show'); document.body.classList.add('contact-open'); contactBtn.classList.add('on'); ov.querySelector('.ck-key').focus({ preventScroll: true }); };
+  const open = () => { window.track('contact-open'); lastFocus = document.activeElement; ov.classList.add('show'); document.body.classList.add('contact-open'); contactBtn.classList.add('on'); ov.querySelector('.ck-key').focus({ preventScroll: true }); };
   const close = () => { ov.classList.remove('show'); document.body.classList.remove('contact-open'); contactBtn.classList.remove('on'); if (lastFocus && lastFocus.focus) lastFocus.focus({ preventScroll: true }); };
   const isOpen = () => ov.classList.contains('show');
   contactBtn.addEventListener('click', () => (isOpen() ? close() : open()));

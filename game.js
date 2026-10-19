@@ -200,6 +200,7 @@ function addBillboard(x, groundTop) {
   const board = { x, y: groundTop - BB_H + 8, w: BB_W, h: 690, el, key: b.key, greeted: false, visited: false, mourned: false };
   el.addEventListener('click', () => {
     board.visited = true; say('Here we go!', 1.8, 'happy'); sfx.talk();
+    if (window.track) window.track('open-' + b.key);
     // so coming back (browser back, or Works on the case study page) lands here again
     try { sessionStorage.setItem('returnTo', JSON.stringify({ key: b.key, coins: player.coins, best: player.best })); } catch (e) {}
   });
@@ -648,7 +649,7 @@ function startGame() {
   lastT = 0;
   requestAnimationFrame(loop);
 }
-$('.cta').addEventListener('click', startGame);
+$('.cta').addEventListener('click', () => { window.track && window.track('start-journey'); startGame(); });
 window.startGame = startGame;
 
 // ---------- coming back from a case study: resume at that billboard ----------
