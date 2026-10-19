@@ -12,8 +12,8 @@
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Space+Grotesk:wght@400;500&display=swap" rel="stylesheet" />
-<link rel="stylesheet" href="chrome.css?v=20261019o" />
-<link rel="stylesheet" href="crt.css?v=20261019o" />
+<link rel="stylesheet" href="chrome.css?v=20261019p" />
+<link rel="stylesheet" href="crt.css?v=20261019p" />
 <style>
   :root {
     --canvas: #f3f3f5;
@@ -82,7 +82,8 @@
 
   /* ---------- About ---------- */
   .about h2 { margin: 0 0 24px; font-size: 36px; line-height: 1.12; letter-spacing: -.025em; font-weight: 700; }
-  .about p { margin: 0; font-size: 17px; line-height: 1.55; color: var(--muted); }
+  .about p { margin: 0 0 14px; font-size: 16px; line-height: 1.55; color: var(--muted); }
+  .about p:last-of-type { margin-bottom: 0; }
   .about .groups { position: absolute; left: 44px; right: 44px; bottom: 44px; display: flex; flex-direction: column; gap: 18px; }
   .k { font-size: 13px; color: var(--muted); margin-bottom: 8px; }
   .chips { display: flex; flex-wrap: wrap; gap: 8px; }
@@ -191,8 +192,10 @@
   <section class="frame about" data-name="About">
     <span class="label">About</span>
     <i class="handle tl"></i><i class="handle tr"></i><i class="handle bl"></i><i class="handle br"></i>
-    <h2>I've always been drawn to change — not just adapting to it, but dancing with it.</h2>
-    <p>Whether it's rethinking a process or picking up a new skill, I find energy in the evolution. I thrive in teams that lead with heart and intention, where building ethically isn't a question, and where I can show up fully — not just as a teammate, but as myself.</p>
+    <h2>A different way of seeing. A thoughtful way of designing.</h2>
+    <p>I’m a Product Designer at Aurasell, based in Bengaluru, India. I’m drawn to complexity — understanding how things work, finding patterns others might miss, and turning complicated problems into experiences that feel simple and intuitive.</p>
+    <p>I’m autistic, which is one part of how I experience the world. I’ve always had a deep curiosity for systems, details, and the way things fit together. That curiosity extends beyond design into trains, public transport, LEGO, and collecting Hot Wheels. Different interests, perhaps. The same instinct to understand how things work.</p>
+    <p>I believe good design starts with curiosity, gets better with intention, and earns its place by making life a little easier. That’s what I try to bring to everything I build.</p>
     <div class="groups">
       <div><div class="k">Skills</div><div class="chips"><span class="chip">Interaction &amp; Product Design</span><span class="chip">Visual Communication</span><span class="chip">Research</span><span class="chip">Design Strategy</span></div></div>
       <div><div class="k">Tools</div><div class="chips"><span class="chip">Figma</span><span class="chip">Adobe XD</span><span class="chip">Framer</span></div></div>
@@ -400,7 +403,7 @@
 
   setActive(0);
 </script>
-<script src="chrome.js?v=20261019o"></script>
+<script src="chrome.js?v=20261019p"></script>
 <script type="importmap">
 {
   "imports": {
@@ -410,7 +413,7 @@
 }
 </script>
 <script type="module">
-  import { initCRT } from './crt.js?v=20261019o';
+  import { initCRT } from './crt.js?v=20261019p';
   initCRT({ target: '#canvas', mount: '#chrome-controls' });
 </script>
 </body>
